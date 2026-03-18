@@ -1,0 +1,83 @@
+<div class="home-container">
+  
+  <section class="controls-section container">
+    <div class="search-wrapper">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input 
+        type="text" 
+        [formControl]="searchControl"
+        placeholder="Search destinations, property types..."
+        class="search-input"
+        aria-label="Search destinations"
+      />
+    </div>
+
+    <div class="categories-bar">
+      @for (cat of categories; track cat.id) {
+        <button 
+          class="category-btn" 
+          [class.active]="activeCategory === cat.id"
+          (click)="setCategory(cat.id)">
+          <span class="material-symbols-outlined">{{cat.icon}}</span>
+          <span class="category-label">{{cat.label}}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <main class="properties-section container">
+    @if (propertyService.loading()) {
+      <div class="loading-state">
+        <span class="material-symbols-outlined spin">sync</span>
+        <p>Loading amazing stays...</p>
+      </div>
+    } @else if (propertyService.error()) {
+      <div class="error-state">
+        <span class="material-symbols-outlined">error</span>
+        <p>{{ propertyService.error() }}</p>
+      </div>
+    } @else {
+      <div class="grid">
+        @for (property of propertyService.filteredProperties(); track property.id) {
+          <article class="property-card">
+            
+            <figure class="card-image-wrapper">
+              <img [src]="property.imageUrl" [alt]="property.title" loading="lazy" class="card-image">
+              @if (property.isGuestFavorite) {
+                <div class="guest-favorite-badge">Guest favorite</div>
+              }
+              <button class="favorite-btn" aria-label="Add to favorites">
+                <span class="material-symbols-outlined">favorite</span>
+              </button>
+            </figure>
+
+            <div class="card-content">
+              <div class="card-header">
+                <h3 class="location">{{property.location}}, {{property.country}}</h3>
+                <div class="rating">
+                  <span class="material-symbols-outlined star">star</span>
+                  <span>{{property.rating}}</span>
+                </div>
+              </div>
+              
+              <p class="title">{{property.title}}</p>
+              
+              <div class="price-container">
+                <span class="price">{{property.pricePerNight | currency}}</span> 
+                <span class="text-muted">night</span>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state">
+            <span class="material-symbols-outlined">search_off</span>
+            <p>No properties found matching your search. Try adjusting the filters!</p>
+            <button class="btn btn-primary" (click)="searchControl.setValue(''); setCategory('all')">
+              Clear search
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
